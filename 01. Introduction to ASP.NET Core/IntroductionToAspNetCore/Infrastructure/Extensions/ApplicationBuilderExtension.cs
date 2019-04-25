@@ -2,11 +2,12 @@ namespace IntroductionToAspNetCore.Infrastructure.Extensions
 {
     using System;
     using System.Reflection;
-    using System.Collections;
     using System.Linq;
     using Microsoft.AspNetCore.Builder;
-    using IntroductionToAspNetCore.Middleware;
-    using IntroductionToAspNetCore.Handlers;
+    using Microsoft.AspNetCore.Http;
+
+    using Middleware;
+    using Handlers;
 
     public static class ApplicationBuilderExtension
     {
@@ -35,6 +36,15 @@ namespace IntroductionToAspNetCore.Infrastructure.Extensions
             }
 
             return builder;
-        }        
+        }      
+        
+        public static void UseNotFoundHandler(this IApplicationBuilder builder)
+        {
+            builder.Run(async (context) =>
+            {
+                context.Response.StatusCode = HttpStatusCode.NotFound;
+                await context.Response.WriteAsync("404 Page Was Not Found!");
+            });
+        }
     }
-}
+} 

@@ -1,7 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace IntroductionToAspNetCore.Data
+﻿namespace IntroductionToAspNetCore.Data
 {
+    using System.ComponentModel.DataAnnotations;
+
     public class Cat
     {
         public int Id { get; set; }

@@ -1,12 +1,13 @@
 namespace IntroductionToAspNetCore.Handlers
 {
     using System;
-    using Microsoft.AspNetCore.Http;
-    using IntroductionToAspNetCore.Infrastructure;
-    using IntroductionToAspNetCore.Data;
-    using Microsoft.Extensions.DependencyInjection;
     using System.ComponentModel.DataAnnotations;
     using System.Collections.Generic;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.DependencyInjection;
+
+    using Infrastructure;
+    using Data;
 
     public class AddCatHandler : IHandler
     {

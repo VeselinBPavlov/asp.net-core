@@ -9,126 +9,71 @@
     using Microsoft.Extensions.DependencyInjection;
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
     using System.Linq;
     using System.Threading.Tasks;
+    using Infrastructure.Extensions;
 
     public class Startup
     {
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<CatsDbContext>(options =>
-                options.UseSqlServer("Server=.;Database=CatsServerDb;Integrated Security=True;"));
+                //options.UseSqlServer("Server=.;Database=CatsServerDb;Integrated Security=True;"));
+                options.UseSqlServer(@"Server=(localdb)\MyInstance;AttachDbFilename=D:\Courses\Data\CatsServerDb_Data.mdf;Database=CatsServerDb;Integrated Security=true;"));
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.Use((context, next) =>
-            {
-                context.RequestServices.GetRequiredService<CatsDbContext>().Database.Migrate();
-                return next();
-            });
+            app.UseDatabaseMigration();
 
             app.UseStaticFiles();
             
-            app.Use((context, next) =>
-            {
-                context.Response.Headers.Add("Content-Type", "text/html");
-                return next();
-            });
+            app.UseHtmlContentType();
 
-            app.MapWhen(
-                ctx => ctx.Request.Path.Value == "/"
-                && ctx.Request.Method == HttpMethod.Get,
-                home =>
-                {
-                    home.Run(async (context) =>
-                    {
-                        await context.Response.WriteAsync($"<h1>Fluffy Duffy Munchkin Cats</h1>");
-
-                        var db = context.RequestServices.GetRequiredService<CatsDbContext>();
-
-                        using (db)
-                        {
-                            var cats = db.Cats.Select(c => new
-                            {
-                                c.Id,
-                                c.Name
-                            }).ToList();
-
-                            await context.Response.WriteAsync("<ul>");
-
-                            foreach (var cat in cats)
-                            {
-                                await context.Response.WriteAsync($@"<li><a href=""/cats/{cat.Id}"">{cat.Name}</a></li>");
-                            }
-
-                            await context.Response.WriteAsync("</ul>");
-                            await context.Response.WriteAsync(@"
-                                        <form action=""/cat/add"">
-                                          <input type=""submit"" value=""Add Cat"" />
-                                        </form>");
-                        }                        
-                    });
-                });
-
-            app.MapWhen(ctx => ctx.Request.Path.Value == "/cat/add",                
-                catAdd =>
-                {
-                    catAdd.Run(async (context) =>
-                    {
-                        if (context.Request.Method == HttpMethod.Get)
-                        {
-                            context.Response.Redirect("/cat-add-form.html");
-                        }
-                        else if (context.Request.Method == HttpMethod.Post)
-                        {
-                            
-                            var form = context.Request.Form;
-
-                            int age = 0;
-                            int.TryParse(form["Age"], out age);
-
-                            var cat = new Cat
-                            {
-                                Name = form["Name"],
-                                Age = age,
-                                Breed = form["Breed"],
-                                ImageUrl = form["ImageUrl"]
-                            };
-           
-                            try
-                            {
-                                if (!IsValid(cat))
-                                {
-                                    throw new InvalidOperationException("Invalid Cat Data!");
-                                }
-                                var db = context.RequestServices.GetRequiredService<CatsDbContext>();
-
-                                using (db)
-                                {
-                                    db.Add(cat);
-
-                                    await db.SaveChangesAsync();
-                                }
-
-                                context.Response.Redirect("/");
-                            }
-                            catch (System.Exception)
-                            {
-                                await context.Response.WriteAsync("<h2>Invalid cat data!</h2>");
-                                await context.Response.WriteAsync($@"<a href=""/cat/add"">Back To The Form</>");
-                            }
-                        }
-                         
-                    });
-                });
-
+            app.UseRequestHandlers();
+         
             app.MapWhen(ctx => ctx.Request.Path.Value.StartsWith("/cat")
                 && ctx.Request.Method == HttpMethod.Get,
                 catDetails =>
                 {
+                    catDetails.Run(async (context) => 
+                    {
+                        var urlParts = context.Request.Path.Value.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                        
+                        if (urlParts.Length < 2) 
+                        {
+                            context.Response.Redirect("/");
+                            return;
+                        }
 
+                        var catId = 0;
+                        int.TryParse(urlParts[1], out catId);
+                        
+                        if (catId == 0)
+                        {
+                            context.Response.Redirect("/");
+                            return;
+                        }
+
+                        var db = context.RequestServices.GetRequiredService<CatsDbContext>();    
+
+                        using(db) 
+                        {
+                            var cat = await db.Cats.FindAsync(catId);
+
+                            if (cat == null)
+                            {
+                                context.Response.Redirect("/");
+                                return; 
+                            }
+
+                            await context.Response.WriteAsync($"<h1>{cat.Name}</h1>");
+                            await context.Response.WriteAsync($@"<img src=""{cat.ImageUrl}"" alt=""{cat.Name}"" width=""300"" />");
+                            await context.Response.WriteAsync($"<p>{cat.Age}</p>");
+                            await context.Response.WriteAsync($"<p>{cat.Breed}</p>");
+                        }
+
+                    });                                      
                 });
 
             app.Run(async (context) =>
@@ -138,14 +83,6 @@
             });
         }
 
-        private static bool IsValid(object entity)
-        {
-            var validationContext = new ValidationContext(entity);
-            var validationResult = new List<ValidationResult>();
 
-            bool isValid = Validator.TryValidateObject(entity, validationContext, validationResult, true);
-
-            return isValid;
-        }
     }
 }

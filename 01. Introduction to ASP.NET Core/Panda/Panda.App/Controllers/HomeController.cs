@@ -4,6 +4,7 @@
 
     public class HomeController : Controller
     {
+
         public IActionResult Index()
         {
             if (User.Identity.IsAuthenticated && User.IsInRole("User"))

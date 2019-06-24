@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Panda.Domain\Panda.Domain.csproj" />
+    <ProjectReference Include="..\Panda.Persistence\Panda.Persistence.csproj" />
+  </ItemGroup>
+
+</Project>

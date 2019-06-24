@@ -8,17 +8,19 @@
 
 ## Topics:
 01. ASP.NET Core Introduction
-02. Basics and Razor Pages
-03. Razor Pages Architecture
-04. MVC Architecture Components
-05. Filters
-06. Identity
-07. Architecture Part 1
-08. Architecture Part 2
-09. Advanced Topics
-10. Unit Testing
+02. Razor Views
+03. Application Flow, Filters and Middleware
+04. Working with Data
+05. ASP.NET WebAPI
+06. Security and Identity
+07. Testing
+08. Advanced Topics Part 1
+09. Advanced Topics Part 2
+10. Advanced Topics Part 3
 11. ASP.NET SignalR
-12. ASP.NET WebAPI
+12. Azure, Deployment and CI
+13. Blazor
+14. Razor Pages
 
 ## Certificate: 
 none

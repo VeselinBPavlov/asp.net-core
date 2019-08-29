@@ -11,13 +11,13 @@
 02. Razor Views
 03. Application Flow, Filters and Middleware
 04. Working with Data
-05. ASP.NET WebAPI
+05. WebAPI
 06. Security and Identity
 07. Testing
 08. Advanced Topics Part 1
 09. Advanced Topics Part 2
-10. Advanced Topics Part 3
-11. ASP.NET SignalR
+10. ML.NET
+11. SignalR
 12. Azure, Deployment and CI
 13. Blazor
 14. Razor Pages
